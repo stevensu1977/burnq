@@ -157,9 +157,14 @@ func (uc *UCMeterClient) UsageCost(startTime, endTime time.Time, query string) (
 	resp, err := client.Do(uc.Request)
 	data, err := ioutil.ReadAll(resp.Body)
 	defer resp.Body.Close()
-
+	fmt.Println(resp.StatusCode)
 	if err != nil {
 		return nil, err
+	}
+
+	//401,403
+	if resp.StatusCode != 200 {
+		return nil, fmt.Errorf(" %d : %s", resp.StatusCode, string(data))
 	}
 
 	cost := &model.UsageCost{}
