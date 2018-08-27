@@ -2,10 +2,9 @@ package utils
 
 import (
 	asset "app/views"
+	"github.com/elazarl/go-bindata-assetfs"
 	"html/template"
 	"time"
-
-	"github.com/elazarl/go-bindata-assetfs"
 )
 
 const (
@@ -51,16 +50,14 @@ func LoadTemplate(templateName string) (*template.Template, error) {
 	//dev model use local static path
 	//fmt.Println(filepath.Abs(templatePath))
 
+	//dev model use local static path
+	//return template.New(templateName+TEMPLATE_PREFIX).Delims("<<%", "%>>").Funcs(funcMap).ParseFiles(TEMPLATE_PATH + "/" + templateName + TEMPLATE_PREFIX)
+
 	//release model use Asset
 	data, err := fs.Asset("views/" + templateName + ".html")
 	if err != nil {
 		return nil, err
 	}
-
-	//dev model use local static path
-	//return template.New(templateName+TEMPLATE_PREFIX).Delims("<<%", "%>>").Funcs(funcMap).ParseFiles(TEMPLATE_PATH + "/" + templateName + TEMPLATE_PREFIX)
-
-	//release model
 	return template.New(templateName+TEMPLATE_PREFIX).Delims("<<%", "%>>").Funcs(funcMap).Parse(string(data))
 
 }

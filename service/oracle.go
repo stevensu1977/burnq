@@ -41,6 +41,47 @@ type DateWrapp struct {
 	End   time.Time
 }
 
+func (uc *UCMeterClient) CheckAuth() bool {
+	var result bytes.Buffer
+	var err error
+	var endpoint *url.URL
+
+	endpoint, err = url.Parse(fmt.Sprintf("%s/%s/%s", UCMeterAPI_Root, UCMeterAPI_Detail, uc.Account.AccountID))
+
+	if err != nil {
+		log.Error(err)
+		return false
+	}
+	uc.Request, err = http.NewRequest("GET", endpoint.String(), &result)
+
+	if err != nil {
+		log.Error(err)
+		return false
+	}
+	uc.Auth()
+
+	log.Debug(uc.Request)
+
+	client := &http.Client{}
+	resp, err := client.Do(uc.Request)
+	body, err := ioutil.ReadAll(resp.Body)
+	defer resp.Body.Close()
+
+	if err != nil {
+		log.Error(err)
+		return false
+	}
+
+	//401,403
+	if resp.StatusCode != 200 {
+		log.Errorf("Auth failure, %d, %s", resp.StatusCode, string(body))
+		return false
+	}
+
+	return true
+
+}
+
 func (uc *UCMeterClient) Detail() (*model.CloudDetail, error) {
 	var result bytes.Buffer
 	var err error
@@ -67,6 +108,11 @@ func (uc *UCMeterClient) Detail() (*model.CloudDetail, error) {
 
 	if err != nil {
 		return nil, err
+	}
+
+	//401,403
+	if resp.StatusCode != 200 {
+		return nil, fmt.Errorf(" %d : %s", resp.StatusCode, string(data))
 	}
 
 	detail := &model.CloudDetail{}
@@ -157,13 +203,14 @@ func (uc *UCMeterClient) UsageCost(startTime, endTime time.Time, query string) (
 	resp, err := client.Do(uc.Request)
 	data, err := ioutil.ReadAll(resp.Body)
 	defer resp.Body.Close()
-	fmt.Println(resp.StatusCode)
+
 	if err != nil {
 		return nil, err
 	}
 
 	//401,403
 	if resp.StatusCode != 200 {
+		log.Errorf("Error: %d, %s", resp.StatusCode, endpoint)
 		return nil, fmt.Errorf(" %d : %s", resp.StatusCode, string(data))
 	}
 
@@ -268,6 +315,11 @@ func (uc *UCMeterClient) UsageCostDetail(startTime, endTime time.Time, query str
 
 	if err != nil {
 		return nil, err
+	}
+
+	//401,403
+	if resp.StatusCode != 200 {
+		return nil, fmt.Errorf(" %d : %s", resp.StatusCode, string(data))
 	}
 
 	cost := &model.UsageCost{}

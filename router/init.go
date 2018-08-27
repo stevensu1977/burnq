@@ -10,10 +10,9 @@ import (
 
 	"github.com/gorilla/mux"
 
-	"github.com/stevensu1977/burnq/handler"
-
 	"github.com/elazarl/go-bindata-assetfs"
 	log "github.com/sirupsen/logrus"
+	"github.com/stevensu1977/burnq/handler"
 )
 
 const API_ROOT = "/api/v1"
@@ -57,13 +56,15 @@ func InitRouter() *mux.Router {
 		AssetDir:  asset.AssetDir,
 		AssetInfo: asset.AssetInfo,
 	}
+	r.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(&fs)))
 
 	//dev model load static file from static directory
 	//r.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("./static"))))
-	r.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(&fs)))
 
 	//API
 	r.HandleFunc("/api/v1", handler.APIVersion)
+
+	r.HandleFunc(APIPath("auth"), handler.Auth)
 
 	r.HandleFunc(APIPath("detail"), handler.Detail)
 
