@@ -8,9 +8,8 @@ import (
 
 	"app/asset"
 
+	assetfs "github.com/elazarl/go-bindata-assetfs"
 	"github.com/gorilla/mux"
-
-	"github.com/elazarl/go-bindata-assetfs"
 	log "github.com/sirupsen/logrus"
 	"github.com/stevensu1977/burnq/handler"
 )
@@ -74,6 +73,8 @@ func InitRouter() *mux.Router {
 	r.HandleFunc(APIPath("account"), handler.FetchAllAccount).Methods("GET")
 	r.HandleFunc(APIPath("account"), handler.CreateCloudAccount).Methods("POST")
 	r.HandleFunc(APIPath("account"), handler.RemoveCloudAccount).Methods("DELETE")
+
+	r.HandleFunc(APIPath("account"), handler.UpdateCloudAccountPasswd).Methods("PUT")
 
 	r.HandleFunc(APIPath("tenant"), handler.FetchAllTenant).Methods("GET")
 
