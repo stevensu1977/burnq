@@ -14,6 +14,57 @@ import (
 	toolbox "github.com/stevensu1977/toolbox/net"
 )
 
+func Auth(w http.ResponseWriter, r *http.Request) {
+	data, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		http.Error(w, err.Error(), 500)
+		return
+	}
+	defer r.Body.Close()
+
+	var account model.CloudAccount
+
+	json.Unmarshal(data, &account)
+
+	client := service.NewClient(account)
+	if client.CheckAuth() {
+		w.Write([]byte("ok"))
+	} else {
+		w.WriteHeader(401)
+		http.Error(w, "401", http.StatusUnauthorized)
+	}
+
+}
+
+func UpdateCloudAccountPasswd(w http.ResponseWriter, r *http.Request) {
+
+	data, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		http.Error(w, err.Error(), 500)
+		return
+	}
+	defer r.Body.Close()
+
+	var account model.CloudAccount
+
+	json.Unmarshal(data, &account)
+
+	client := service.NewClient(account)
+	if client.CheckAuth() {
+
+		if err := service.UpdateAccountPasswd(&account); err != nil {
+			http.Error(w, err.Error(), 500)
+			return
+		}
+		w.Write([]byte("ok"))
+
+	} else {
+		w.WriteHeader(401)
+		http.Error(w, "401", http.StatusUnauthorized)
+	}
+
+}
+
 func CreateCloudAccount(w http.ResponseWriter, r *http.Request) {
 
 	data, err := ioutil.ReadAll(r.Body)
