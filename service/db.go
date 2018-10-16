@@ -139,6 +139,15 @@ func UpdateAdminPasswd(admin *model.Admin) error {
 	return db.From("admin").Update(admin)
 }
 
+func UpdateAccountPasswd(account *model.CloudAccount) error {
+	password, err := crypto.AESEncrypt(account.Password)
+	if err != nil {
+		return err
+	}
+	account.Password = password
+	return db.From("user").Update(account)
+}
+
 //SaveAccount save cloud account to db
 func SaveAccount(account *model.CloudAccount) error {
 	password, err := crypto.AESEncrypt(account.Password)
