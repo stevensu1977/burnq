@@ -16,8 +16,9 @@ const (
 	PASSWORD    = "password"
 	SESSION_KEY = "user"
 
-	UsageMaxCache  = 45 * time.Minute
-	DetailMaxCache = 45 * time.Minute
+	UsageMaxCache  = 2 * 60 * time.Minute
+	DetailMaxCache = 2 * 60 * time.Minute
+	ErrorMaxCache  = 5 * 24 * 60 * time.Minute
 )
 
 func APIVersion(w http.ResponseWriter, r *http.Request) {
