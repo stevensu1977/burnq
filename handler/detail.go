@@ -1,37 +1,12 @@
 package handler
 
 import (
-	"encoding/json"
-	"io/ioutil"
 	"net/http"
 
 	log "github.com/sirupsen/logrus"
-	"github.com/stevensu1977/burnq/model"
 	"github.com/stevensu1977/burnq/service"
 	toolbox "github.com/stevensu1977/toolbox/net"
 )
-
-func Auth(w http.ResponseWriter, r *http.Request) {
-	data, err := ioutil.ReadAll(r.Body)
-	if err != nil {
-		http.Error(w, err.Error(), 500)
-		return
-	}
-	defer r.Body.Close()
-
-	var account model.CloudAccount
-
-	json.Unmarshal(data, &account)
-
-	client := service.NewClient(account)
-	if client.CheckAuth() {
-		w.Write([]byte("ok"))
-	} else {
-		w.WriteHeader(401)
-		http.Error(w, "401", http.StatusUnauthorized)
-	}
-
-}
 
 func Detail(w http.ResponseWriter, r *http.Request) {
 
@@ -57,7 +32,7 @@ func Detail(w http.ResponseWriter, r *http.Request) {
 			client := service.NewClient(*account)
 			detail, err := client.Detail()
 			if err != nil {
-				service.GlobalCache.Put(account.GetCacheKey("detail"), "500", DetailMaxCache)
+				service.GlobalCache.Put(account.GetCacheKey("detail"), "500", ErrorMaxCache)
 				http.Error(w, err.Error(), 500)
 				return
 			} else {
