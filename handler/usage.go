@@ -21,7 +21,7 @@ func Usage(w http.ResponseWriter, r *http.Request) {
 	endTime := r.URL.Query().Get("endTime")
 	tenant := r.URL.Query().Get("tenant")
 	if tenant == "" {
-		tenant = "xjbank"
+		http.Error(w, "need tanat ID", 500)
 	}
 	account, err := service.FetchAccount(tenant, true)
 
@@ -40,6 +40,8 @@ func Usage(w http.ResponseWriter, r *http.Request) {
 			times := service.BuildStart2End(startTime, endTime)
 			usage, err := client.UsageCost(times[0], times[1], service.Query_DAILY)
 			if err != nil {
+				//if get error , cache 5 days , not access use same username/password
+				service.GlobalCache.Put(account.GetCacheKey(startTime, endTime), "500", ErrorMaxCache)
 				http.Error(w, err.Error(), 500)
 				return
 			}
@@ -48,6 +50,8 @@ func Usage(w http.ResponseWriter, r *http.Request) {
 		} else {
 			usage, err := client.UsageCostCurrentMonth()
 			if err != nil {
+				//if get error , cache 5 days , not access use same username/password
+				service.GlobalCache.Put(account.GetCacheKey(startTime, endTime), "500", ErrorMaxCache)
 				http.Error(w, err.Error(), 500)
 				return
 			}
@@ -67,7 +71,7 @@ func UsageDaliy(w http.ResponseWriter, r *http.Request) {
 
 	tenant := r.URL.Query().Get("tenant")
 	if tenant == "" {
-		tenant = "xjbank"
+		http.Error(w, "need tanat ID", 500)
 	}
 	account, err := service.FetchAccount(tenant, true)
 
